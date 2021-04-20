@@ -1,0 +1,31 @@
+=== [Design Patterns in our Project] ===
+
+1. Factory:
+In our code, we use factory design pattern to create the user account. As you can see, we create a interface named
+AccountFactory in the use case level, coming with subclasses which can create the exact user account we want.
+
+OrganizerFactory -> generate Organizer
+SpeakerFactory -> generate Speaker
+AttendeeFactory -> generate Attendee
+VIPFactory -> generate VIP
+
+2. Builder
+In our project, we use the Builder design pattern for the construction of Rooms. Since the Room class has a variety of
+different variables, it would be bad design to have a constructor with many parameters or a large amount of constructors
+for different types of rooms based on their features. Therefore, we use the Builder design pattern to remedy this,
+allowing us to create each room in a series of steps based on what features it has. This Builder also allows the code
+to be extended in the future much more easily, as if a different type of Room class is created in the future,
+a new Builder class could be created that extends RoomBuilder.
+
+The builder is designed in a way that each of the methods for setting the values of the builder (such as
+RoomBuilder.roomNumber(), RoomBuilder.capacity(), etc.) return the builder itself, allowing method cascading to be used
+in the build method to improving readability.
+
+3. Dependency injection
+In our project, there are many methods that use the dependency injection design pattern. Methods can often
+have hardcoded variables, though this may not be the best design. As a notable example, many of our controllers need to
+contain use cases. Unfortunately, the manager use cases contain field variables that need to be uniform across the
+controllers. If each controller has a hardcoded new copy of the use cases, it would be messy and difficult to keep the
+variables like userMap or eventList the same without making them static. Our solution then, is to keep a single copy of
+each use case in a general controller (ConferenceSystem) and pass them as parameters to the constructors of the
+individual controllers so we can keep the same use cases across all controllers that need them.
