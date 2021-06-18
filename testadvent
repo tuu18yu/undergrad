@@ -1,0 +1,150 @@
+if test $# -eq 1
+then
+	cd $1/start
+	current=start
+elif test $# -eq 2
+then
+	cd $1/$2
+	current=$2
+fi
+
+
+cat view
+
+eval $current=visited
+			
+if test `ls | grep obj | wc -l` -ne 0 
+then
+	for obj in obj-*	
+	do
+		newobj=`echo $obj | sed 's/obj-//'`				
+
+		eval o$newobj="$current"
+		eval c$newobj="$current"
+		allobjects="$allobjects $newobj"
+
+		description=`cat obj-$newobj`
+		echo There is $description here.
+	done
+fi
+
+if test -f points
+then
+	cat points | tail -1
+	point=`cat points | head -1` 
+	score=`expr $score + $point`
+fi 
+
+while read input1 input2 
+do
+	case $input1 in
+		[nesw])
+			if test -f exit-$input1
+			then
+				exit=`cat exit-$input1`
+				current=$exit
+				newroom=t
+				cd ..
+				cd $exit
+				
+					
+				cat view
+
+				eval isvisited='$'$current
+				if test "$isvisited" != "visited"
+				then
+					eval $current=visited
+			
+					if test `ls | grep obj | wc -l` -ne 0 
+					then
+						for obj in obj-*	
+						do
+							newobj=`echo $obj | sed 's/obj-//'`				
+
+							eval o$newobj="$current"
+							eval c$newobj="$current"
+							allobjects="$allobjects $newobj"
+
+							description=`cat obj-$newobj`
+							echo There is $description here.
+						done
+					fi
+
+					if test -f points
+					then
+						cat points | tail -1
+						point=`cat points | head -1` 
+						score=`expr $score + $point`
+					fi 
+			
+				else
+					for obj in $allobjects
+					do
+					if test `eval echo '$'c$obj` = "$current" 
+					then
+						cd ..
+						cd `eval echo '$'o$obj`
+						description=`cat obj-$obj`
+						cd ..
+						cd $current
+						echo There is $description here. 
+					fi
+					done
+				fi
+			else
+				echo There is no way to go to that direction
+			fi
+			;;
+		score)
+			echo Your current score is $score
+			;;
+		l*)
+			cat view	
+			for obj in $allobjects
+			do
+				if test `eval echo '$'c$obj` = "$current" 
+				then
+					cd ..
+					cd `eval echo '$'o$obj`
+					description=`cat obj-$obj`
+					cd ..
+					cd $current
+					echo There is $description here.
+				fi
+			done 
+			;;
+		get)
+			if test `eval echo '$'c$input2` != "$current"
+			then
+				echo There is no object named $input2 here.
+			else
+				eval c$input2=carrying
+				echo Taken.
+			fi
+			;;
+		drop)
+			if test `eval echo '$'c$input2` = "carrying" 
+			then
+				eval c$input2="$current"
+				echo Dropped.
+			else
+				echo You are not carrying an object named $input2.
+			fi
+			;; 	
+		inv)
+			echo You are currently carrying:
+
+			for obj in $allobjects
+			do
+				if test `eval echo '$'c$obj` = "carrying"
+				then
+					echo $obj
+				fi
+			done
+			;;
+		*)
+			echo Not a valid input.
+			echo Valid inputs: look l inv n w e s drop get score
+			
+	esac
+done
